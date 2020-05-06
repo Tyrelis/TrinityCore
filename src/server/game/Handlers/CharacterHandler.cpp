@@ -17,6 +17,7 @@
 
 #include "WorldSession.h"
 #include "ArenaTeamMgr.h"
+#include "Battleground.h"
 #include "CalendarMgr.h"
 #include "CharacterCache.h"
 #include "CharacterPackets.h"
@@ -927,7 +928,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
             repMgr.SetOneFactionReputation(sFactionStore.LookupEntry(1091), 42999, false); // The Wyrmrest Accord
 
             // Factions depending on team, like cities and some more stuff
-            switch (pCurrChar->GetTeam())
+            switch (pCurrChar->GetCFSTeam())
             {
                 case ALLIANCE:
                     repMgr.SetOneFactionReputation(sFactionStore.LookupEntry(  72), 42999, false); // Stormwind
@@ -1000,6 +1001,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     TC_METRIC_EVENT("player_events", "Login", pCurrChar->GetName());
 
     delete holder;
+
+    if (pCurrChar->GetTeam() != pCurrChar->GetCFSTeam())
+        pCurrChar->FitPlayerInTeam(pCurrChar->GetBattleground() && !pCurrChar->GetBattleground()->isArena() ? true : false, pCurrChar->GetBattleground());
 }
 
 void WorldSession::SendFeatureSystemStatus()

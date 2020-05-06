@@ -886,6 +886,25 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
 
         PlayerAI* AI() const { return reinterpret_cast<PlayerAI*>(GetAI()); }
 
+        // Cross BG
+        void SendChatMessage(const char *format, ...);
+        void SendBattleGroundChat(uint32 msgtype, std::string message);
+        /// Constructs the player Chat data for the specific functions to use 
+        void BuildPlayerChat(WorldPacket* data, uint8 msgtype, std::string const& text, uint32 language) const;
+
+        void FitPlayerInTeam(bool action, Battleground* pBattleGround = NULL);                          // void FitPlayerInTeam(bool action, Battleground* bg = NULL);
+        void MorphFit(bool value);
+
+        void SetCFSRace() { m_RealRace = GetByteValue(UNIT_FIELD_BYTES_0, UNIT_BYTES_0_OFFSET_RACE); }; // SHOULD ONLY BE CALLED ON LOGIN
+        void SetFakeRaceAndMorph(); // SHOULD ONLY BE CALLED ON LOGIN
+        uint32 GetFakeMorph() { return m_FakeMorph; };
+        uint8 getFRace() const { return m_FakeRace; }
+        uint8 getCFSRace() const { return m_RealRace; }
+        uint32 GetCFSTeam() const { return m_team; }
+        uint32 GetTeam() const { return m_bgData.bgTeam && GetBattleground() ? m_bgData.bgTeam : m_team; }
+        bool IsPlayingNative() const { return GetTeam() == m_team; }
+        // End Cross BG
+
         void CleanupsBeforeDelete(bool finalCleanup = true) override;
 
         void AddToWorld() override;
@@ -939,7 +958,7 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         void RemoveSocial();
 
         PlayerTaxi m_taxi;
-        void InitTaxiNodesForLevel() { m_taxi.InitTaxiNodesForLevel(GetRace(), GetClass(), GetLevel()); }
+        void InitTaxiNodesForLevel() { m_taxi.InitTaxiNodesForLevel(getCFSRace(), GetClass(), GetLevel()); }
         bool ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc = nullptr, uint32 spellid = 0);
         bool ActivateTaxiPathTo(uint32 taxi_path_id, uint32 spellid = 0);
         void FinishTaxiFlight();
@@ -1752,8 +1771,8 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         void CheckAreaExploreAndOutdoor(void);
 
         static uint32 TeamForRace(uint8 race);
-        uint32 GetTeam() const { return m_team; }
-        TeamId GetTeamId() const { return m_team == ALLIANCE ? TEAM_ALLIANCE : TEAM_HORDE; }
+        TeamId GetTeamId() const { return GetTeam() == ALLIANCE ? TEAM_ALLIANCE : TEAM_HORDE; }
+        TeamId GetCFSTeamId() const { return GetCFSTeam() == ALLIANCE ? TEAM_ALLIANCE : TEAM_HORDE; }
         void SetFactionForRace(uint8 race);
 
         void InitDisplayIds();
@@ -1924,7 +1943,6 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         void SetBattlegroundEntryPoint();
 
         void SetBGTeam(uint32 team);
-        uint32 GetBGTeam() const;
 
         void LeaveBattleground(bool teleportToEntryPoint = true);
         bool CanJoinToBattleground(Battleground const* bg) const;
@@ -2497,6 +2515,11 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         // variables to save health and mana before duel and restore them after duel
         uint32 healthBeforeDuel;
         uint32 manaBeforeDuel;
+
+        // variables from CrossBGFaction
+        uint8 m_FakeRace;
+        uint8 m_RealRace;
+        uint32 m_FakeMorph;
 
         WorldLocation _corpseLocation;
 };

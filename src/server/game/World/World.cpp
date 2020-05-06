@@ -1518,6 +1518,8 @@ void World::LoadConfigSettings(bool reload)
     // Whether to use LoS from game objects
     m_bool_configs[CONFIG_CHECK_GOBJECT_LOS] = sConfigMgr->GetBoolDefault("CheckGameObjectLoS", true);
 
+    m_bool_configs[CROSSFACTION_SYSTEM_BATTLEGROUNDS] = sConfigMgr->GetBoolDefault("CrossfactionBG.enable", true);
+
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);
