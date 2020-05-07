@@ -13502,3 +13502,11 @@ std::string Unit::GetDebugInfo() const
         << " " << (movespline ? movespline->ToString() : "Movespline: <none>");
     return sstr.str();
 }
+
+void Unit::UpdateFactionForSelfAndControllList()
+{
+    ForceValuesUpdateAtIndex(UNIT_FIELD_FACTIONTEMPLATE);
+
+    for (Unit* unit : m_Controlled)
+        unit->ForceValuesUpdateAtIndex(UNIT_FIELD_FACTIONTEMPLATE);
+}
